@@ -1,0 +1,65 @@
+.todo-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  word-break: break-word;
+}
+
+.todo-item .completed {
+  color: #999;
+  text-decoration: line-through;
+  font-style: italic;
+}
+
+.todo-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #555;
+}
+
+.todo-footer button {
+  border: none;
+  background: transparent;
+  color: red;
+  cursor: pointer;
+}
+
+/* 반응형 카드 */
+@media (max-width: 600px) {
+  .todo-item {
+    padding: 10px;
+  }
+
+  .todo-footer {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .todo-footer span {
+    font-size: 12px;
+  }
+
+  .todo-footer button {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 400px) {
+  .todo-item {
+    padding: 8px;
+  }
+
+  .todo-footer span {
+    font-size: 11px;
+  }
+
+  .todo-footer button {
+    font-size: 12px;
+  }
+}

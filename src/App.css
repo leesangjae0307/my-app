@@ -1,38 +1,51 @@
-.App {
-  text-align: center;
+.app-container {
+  max-width: 900px; /* PC에서 3열 가능하도록 확장 */
+  margin: 20px auto;
+  padding: 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
+@media (max-width: 600px) {
+  .app-container {
+    max-width: 100%;
+    padding: 8px;
+  }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+  .controls {
+    flex-direction: column;
+  }
+
+  .controls input[type="text"],
+  .controls select {
+    width: 100%;
+  }
+
+  .todo-form input,
+  .todo-form button {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .todo-item {
+    font-size: 14px;
+    padding: 10px;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@media (max-width: 400px) {
+  h1 {
+    font-size: 20px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .todo-form input,
+  .todo-form button {
+    font-size: 13px;
+  }
+
+  .todo-item {
+    font-size: 13px;
+    padding: 8px;
   }
 }

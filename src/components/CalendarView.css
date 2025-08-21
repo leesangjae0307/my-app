@@ -1,0 +1,59 @@
+.calendar-container {
+  margin: 20px 0;
+}
+
+.calendar-header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calendar-header-nav button {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-header {
+  font-weight: bold;
+  text-align: center;
+}
+
+.calendar-cell {
+  height: 50px;
+  border: 1px solid #ddd;
+  text-align: center;
+  line-height: 20px;
+  position: relative;
+}
+
+.calendar-cell.clickable {
+  cursor: pointer;
+  background-color: #f9f9f9;
+}
+
+.calendar-cell.clickable:hover {
+  background-color: #e0f7fa;
+}
+
+.calendar-cell.empty {
+  background-color: #fff;
+  border: none;
+}
+
+.todo-count {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 12px;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 50%;
+}
