@@ -18,14 +18,15 @@ export default function App() {
   });
 
   const [currentUser, setCurrentUser] = useState(appData.currentUser);
-  const [originalAdmin, setOriginalAdmin] = useState(null); // 관리자 원래 계정 저장
+  const [showSignup, setShowSignup] = useState(false); // 회원가입 화면 상태
+  const [originalAdmin, setOriginalAdmin] = useState(null);
   const [todos, setTodos] = useState(
     currentUser ? appData.todos[currentUser] || [] : []
   );
   const [hideCompleted, setHideCompleted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
-  const [selectedDate, setSelectedDate] = useState(null); // 날짜 클릭 필터
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const isAdmin = currentUser === "admin";
 
@@ -67,7 +68,6 @@ export default function App() {
   const deleteTodo = (id) =>
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
 
-  // 필터링 및 정렬
   const filteredTodos = todos.filter((todo) => {
     if (hideCompleted && todo.completed) return false;
     if (categoryFilter !== "All" && todo.category !== categoryFilter)
@@ -84,7 +84,6 @@ export default function App() {
     (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
   );
 
-  // 날짜 클릭 필터 적용
   const todosToShow = selectedDate
     ? sortedTodos.filter((t) => t.dueDate.slice(0, 10) === selectedDate)
     : sortedTodos;
@@ -124,7 +123,7 @@ export default function App() {
     if (!isAdmin) return;
     if (!originalAdmin) setOriginalAdmin(currentUser);
     setCurrentUser(email);
-    setSelectedDate(null); // 날짜 선택 초기화
+    setSelectedDate(null);
   };
 
   const returnAdmin = () => {
@@ -135,7 +134,6 @@ export default function App() {
     }
   };
 
-  // 날짜 클릭 핸들러
   const handleDateClick = (dateStr) => {
     setSelectedDate(dateStr);
   };
@@ -143,7 +141,19 @@ export default function App() {
   return (
     <div className="app-container">
       {!currentUser ? (
-        <Login setCurrentUser={setCurrentUser} setAppData={setAppData} />
+        showSignup ? (
+          <Signup
+            setShowSignup={setShowSignup}
+            setCurrentUser={setCurrentUser}
+            setAppData={setAppData}
+          />
+        ) : (
+          <Login
+            setShowSignup={setShowSignup}
+            setCurrentUser={setCurrentUser}
+            setAppData={setAppData}
+          />
+        )
       ) : (
         <>
           <h1>📋 {currentUser}'s To-Do List</h1>
@@ -220,10 +230,8 @@ export default function App() {
             />
           </div>
 
-          {/* 캘린더에 onDateClick 전달 */}
           <CalendarView todos={sortedTodos} onDateClick={handleDateClick} />
 
-          {/* TodoList에는 날짜 필터 적용 */}
           <TodoList
             todos={todosToShow}
             toggleTodo={toggleTodo}

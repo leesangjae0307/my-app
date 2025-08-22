@@ -10,25 +10,19 @@ const Signup = ({ setShowSignup, setCurrentUser, setAppData }) => {
       todos: {},
       currentUser: null,
     };
-
-    // 이미 존재하는 계정 체크
     if (data.users.find((u) => u.email === email)) {
-      alert("이미 존재하는 계정입니다.");
-      return;
+      return alert("이미 존재하는 계정입니다.");
     }
 
-    // 새로운 사용자 추가
     data.users.push({ email, password });
     data.todos[email] = [];
-    data.currentUser = email; // 가입 후 자동 로그인
-
-    // localStorage와 App.js 상태 업데이트
+    data.currentUser = email;
     localStorage.setItem("appData", JSON.stringify(data));
     setAppData(data);
     setCurrentUser(email);
 
-    setShowSignup(false); // 로그인 화면으로 이동
     alert("회원가입 완료!");
+    setShowSignup(false); // 로그인 화면으로 이동
   };
 
   return (
