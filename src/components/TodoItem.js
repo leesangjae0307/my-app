@@ -1,36 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import "./TodoItem.css";
 
-export default function TodoItem({
+function TodoItem({
   todo,
   toggleTodo,
   deleteTodo,
   categoryColorMap,
+  currentTime,
 }) {
-  const [timeLeft, setTimeLeft] = useState("");
+  // 남은 시간 계산
+  const timeLeft = useMemo(() => {
+    const diff = new Date(todo.dueDate) - currentTime;
+    if (diff <= 0) return "마감 지남";
 
-  useEffect(() => {
-    const update = () => {
-      const now = new Date();
-      const diff = new Date(todo.dueDate) - now;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
 
-      if (diff <= 0) {
-        setTimeLeft("마감 지남");
-        return;
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-
-      setTimeLeft(`${days}일 ${hours}시간 ${minutes}분 ${seconds}초 남음`);
-    };
-
-    update();
-    const timer = setInterval(update, 1000);
-    return () => clearInterval(timer);
-  }, [todo.dueDate]);
+    return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초 남음`;
+  }, [todo.dueDate, currentTime]);
 
   const isUrgent = timeLeft.includes("0일") || timeLeft.includes("마감 지남");
   const category = todo.category || "일반";
@@ -55,3 +44,5 @@ export default function TodoItem({
     </li>
   );
 }
+
+export default React.memo(TodoItem);

@@ -1,45 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "./CalendarView.css";
 
 export default function CalendarView({ todos, onDateClick }) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0~11
+  const [month, setMonth] = useState(today.getMonth());
 
   const prevMonth = () => {
-    if (month === 0) {
-      setYear((y) => y - 1);
-      setMonth(11);
-    } else {
-      setMonth((m) => m - 1);
-    }
+    setMonth((m) => (m === 0 ? (setYear((y) => y - 1), 11) : m - 1));
   };
-
   const nextMonth = () => {
-    if (month === 11) {
-      setYear((y) => y + 1);
-      setMonth(0);
-    } else {
-      setMonth((m) => m + 1);
-    }
+    setMonth((m) => (m === 11 ? (setYear((y) => y + 1), 0) : m + 1));
   };
 
-  // 해당 월의 날짜 배열 생성
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDay = new Date(year, month, 1).getDay(); // 0:일, 6:토
+  const firstDay = new Date(year, month, 1).getDay();
 
   const dates = [];
   for (let i = 0; i < firstDay; i++) dates.push(null);
   for (let d = 1; d <= daysInMonth; d++) dates.push(d);
 
-  // 날짜별 할 일 표시 여부
-  const getTodoCount = (day) => {
-    if (!day) return 0;
-    const dayStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
-    return todos.filter((t) => t.dueDate.slice(0, 10) === dayStr).length;
-  };
+  // todos 카운트 미모화
+  const todoCountMap = useMemo(() => {
+    const map = {};
+    todos.forEach((t) => {
+      const dayStr = t.dueDate.slice(0, 10);
+      map[dayStr] = (map[dayStr] || 0) + 1;
+    });
+    return map;
+  }, [todos]);
 
   return (
     <div className="calendar-container">
@@ -59,19 +48,16 @@ export default function CalendarView({ todos, onDateClick }) {
         ))}
 
         {dates.map((day, idx) => {
-          const count = getTodoCount(day);
+          const dayStr = `${year}-${String(month + 1).padStart(
+            2,
+            "0"
+          )}-${String(day).padStart(2, "0")}`;
+          const count = todoCountMap[dayStr] || 0;
           return (
             <div
               key={idx}
               className={`calendar-cell ${day ? "clickable" : "empty"}`}
-              onClick={() =>
-                day &&
-                onDateClick(
-                  `${year}-${String(month + 1).padStart(2, "0")}-${String(
-                    day
-                  ).padStart(2, "0")}`
-                )
-              }
+              onClick={() => day && onDateClick(dayStr)}
             >
               {day}
               {count > 0 && <div className="todo-count">{count}</div>}

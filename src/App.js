@@ -18,7 +18,7 @@ export default function App() {
   });
 
   const [currentUser, setCurrentUser] = useState(appData.currentUser);
-  const [showSignup, setShowSignup] = useState(false); // 회원가입 화면 상태
+  const [showSignup, setShowSignup] = useState(false);
   const [originalAdmin, setOriginalAdmin] = useState(null);
   const [todos, setTodos] = useState(
     currentUser ? appData.todos[currentUser] || [] : []
@@ -30,10 +30,12 @@ export default function App() {
 
   const isAdmin = currentUser === "admin";
 
+  // currentUser 변경 시 todos 업데이트
   useEffect(() => {
     if (currentUser) setTodos(appData.todos[currentUser] || []);
   }, [currentUser, appData]);
 
+  // todos 변경 시 localStorage 업데이트
   useEffect(() => {
     if (!currentUser) return;
     const newAppData = {
@@ -45,8 +47,8 @@ export default function App() {
   }, [todos, appData, currentUser]);
 
   const addTodo = (text, dueDate, category) => {
-    setTodos([
-      ...todos,
+    setTodos((prev) => [
+      ...prev,
       {
         id: Date.now(),
         text,
@@ -134,9 +136,7 @@ export default function App() {
     }
   };
 
-  const handleDateClick = (dateStr) => {
-    setSelectedDate(dateStr);
-  };
+  const handleDateClick = (dateStr) => setSelectedDate(dateStr);
 
   return (
     <div className="app-container">
