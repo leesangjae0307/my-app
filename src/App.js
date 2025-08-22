@@ -41,7 +41,7 @@ export default function App() {
     };
     setAppData(newAppData);
     localStorage.setItem("appData", JSON.stringify(newAppData));
-  }, [todos]);
+  }, [todos, appData, currentUser]);
 
   const addTodo = (text, dueDate, category) => {
     setTodos([

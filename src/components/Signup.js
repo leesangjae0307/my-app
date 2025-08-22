@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const Signup = ({ setShowSignup, setCurrentUser, setAppData }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState(""); // 알림 메시지 상태
 
   const signup = () => {
     const data = JSON.parse(localStorage.getItem("appData")) || {
@@ -11,24 +12,23 @@ const Signup = ({ setShowSignup, setCurrentUser, setAppData }) => {
       currentUser: null,
     };
 
-    // 이미 존재하는 계정 체크
     if (data.users.find((u) => u.email === email)) {
-      alert("이미 존재하는 계정입니다.");
+      setMessage("이미 존재하는 계정입니다.");
       return;
     }
 
-    // 새로운 사용자 추가
     data.users.push({ email, password });
     data.todos[email] = [];
-    data.currentUser = email; // 가입 후 자동 로그인
+    data.currentUser = email;
 
-    // localStorage와 App.js 상태 업데이트
     localStorage.setItem("appData", JSON.stringify(data));
     setAppData(data);
     setCurrentUser(email);
 
-    alert("회원가입 완료!");
-    setShowSignup(false); // 로그인 화면으로 이동
+    setMessage("✅ 회원가입 완료!");
+    setTimeout(() => {
+      setShowSignup(false); // 1~2초 뒤 로그인 화면으로 이동
+    }, 1500);
   };
 
   return (
@@ -46,6 +46,7 @@ const Signup = ({ setShowSignup, setCurrentUser, setAppData }) => {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button onClick={signup}>회원가입</button>
+      {message && <p style={{ color: "green" }}>{message}</p>}
       <p>
         이미 계정이 있나요?{" "}
         <span
