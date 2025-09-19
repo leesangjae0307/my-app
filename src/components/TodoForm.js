@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./TodoForm.css";
 
-function TodoForm({ addTodo, categories = [] }) {
+function TodoForm({ addTodo, categories = [], onAddCategory }) {
   const [text, setText] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
@@ -12,8 +13,9 @@ function TodoForm({ addTodo, categories = [] }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!text.trim() || !dueDate) return;
-    addTodo(text, dueDate, category);
+    addTodo(text, dueDate, category, startDate);
     setText("");
+    setStartDate("");
     setDueDate("");
     setCategory("");
   };
@@ -26,11 +28,24 @@ function TodoForm({ addTodo, categories = [] }) {
         onChange={(e) => setText(e.target.value)}
         placeholder="할 일을 입력하세요"
       />
-      <input
-        type="datetime-local"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-      />
+      <div className="date-inputs">
+        <div className="date-input">
+          <label>시작일</label>
+          <input
+            type="datetime-local"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+        <div className="date-input">
+          <label>마감일</label>
+          <input
+            type="datetime-local"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </div>
+      </div>
       <div className="category-input">
         {isAddingCategory ? (
           <div className="new-category">
@@ -44,7 +59,9 @@ function TodoForm({ addTodo, categories = [] }) {
               type="button"
               onClick={() => {
                 if (newCategory.trim()) {
-                  setCategory(newCategory.trim());
+                  const trimmedCategory = newCategory.trim();
+                  onAddCategory?.(trimmedCategory);
+                  setCategory(trimmedCategory);
                   setNewCategory("");
                   setIsAddingCategory(false);
                 }
@@ -90,6 +107,8 @@ function TodoForm({ addTodo, categories = [] }) {
 
 TodoForm.propTypes = {
   addTodo: PropTypes.func.isRequired,
+  categories: PropTypes.arrayOf(PropTypes.string),
+  onAddCategory: PropTypes.func,
 };
 
 export default React.memo(TodoForm);

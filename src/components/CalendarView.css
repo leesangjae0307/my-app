@@ -17,7 +17,62 @@
 .calendar-title {
   text-align: center;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-title h3 {
   margin: 0;
+}
+
+.add-todo-button {
+  padding: 4px 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.add-todo-button:hover {
+  background-color: #45a049;
+}
+
+.quick-add-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.quick-add-form input,
+.quick-add-form select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.quick-add-form button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.quick-add-form button:first-of-type {
+  background-color: #4caf50;
+  color: white;
+}
+
+.quick-add-form button:last-of-type {
+  background-color: #f44336;
+  color: white;
 }
 
 .calendar-grid {

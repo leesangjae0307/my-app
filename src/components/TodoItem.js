@@ -13,9 +13,9 @@ function TodoItem({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(todo.text);
 
-  // 날짜 포맷팅
-  const formattedDate = useMemo(() => {
-    const date = new Date(todo.dueDate);
+  // 날짜 포맷팅 함수
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
     const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -24,7 +24,14 @@ function TodoItem({
     const minutes = date.getMinutes().toString().padStart(2, "0");
 
     return `${month}월 ${day}일 (${weekday}) ${hours}:${minutes}`;
-  }, [todo.dueDate]);
+  };
+
+  // 시작일과 마감일 포맷팅
+  const formattedDates = useMemo(() => {
+    const startDateStr = formatDate(todo.startDate || todo.dueDate);
+    const dueDateStr = formatDate(todo.dueDate);
+    return todo.startDate ? `${startDateStr} ~ ${dueDateStr}` : dueDateStr;
+  }, [todo.startDate, todo.dueDate]);
 
   // 남은 시간 계산
   const timeLeft = useMemo(() => {
@@ -99,7 +106,7 @@ function TodoItem({
       <div className="todo-info">
         <span className="todo-category">[{category}]</span>
         <span className="todo-date" title={timeLeft}>
-          {formattedDate}
+          {formattedDates}
         </span>
         <div className="todo-actions">
           <button onClick={() => setIsEditing(true)} className="edit-btn">
@@ -120,6 +127,7 @@ TodoItem.propTypes = {
     text: PropTypes.string.isRequired,
     completed: PropTypes.bool.isRequired,
     dueDate: PropTypes.string.isRequired,
+    startDate: PropTypes.string,
     category: PropTypes.string,
   }).isRequired,
   toggleTodo: PropTypes.func.isRequired,

@@ -40,21 +40,40 @@ function AppContent() {
     : sortedTodos;
 
   const categories = useMemo(() => {
+    const todoCategories = new Set(userTodos.map((todo) => todo.category));
+    if (!state.categories?.[currentUser]) {
+      return ["All", ...Array.from(todoCategories)];
+    }
     return [
       "All",
-      ...Array.from(new Set(userTodos.map((todo) => todo.category))),
+      ...state.categories[currentUser],
+      ...Array.from(todoCategories),
     ];
-  }, [userTodos]);
+  }, [userTodos, state.categories, currentUser]);
+
+  const handleAddCategory = (newCategory) => {
+    const existingCategories = state.categories?.[currentUser] || [];
+    if (!existingCategories.includes(newCategory)) {
+      dispatch({
+        type: ActionTypes.UPDATE_CATEGORIES,
+        payload: {
+          ...state.categories,
+          [currentUser]: [...existingCategories, newCategory],
+        },
+      });
+    }
+  };
 
   const BASE_COLORS = ["#ffd6d6", "#d6f0ff", "#d6ffd8", "#fff6d6", "#f0d6ff"];
   const categoryColorMap = useCategoryColors(categories, BASE_COLORS);
 
-  const addTodo = (text, dueDate, category) => {
+  const addTodo = (text, dueDate, category, startDate) => {
     const newTodos = [
       ...userTodos,
       {
         id: Date.now(),
         text,
+        startDate: startDate || dueDate, // 시작일이 없으면 마감일과 동일하게 설정
         dueDate,
         category: category || "일반",
         completed: false,
@@ -185,7 +204,11 @@ function AppContent() {
             </div>
           )}
 
-          <TodoForm addTodo={addTodo} categories={categories} />
+          <TodoForm
+            addTodo={addTodo}
+            categories={categories}
+            onAddCategory={handleAddCategory}
+          />
 
           <div className="controls">
             <label>
@@ -220,6 +243,8 @@ function AppContent() {
             todos={sortedTodos}
             onDateClick={handleDateClick}
             selectedDate={selectedDate}
+            addTodo={addTodo}
+            categories={categories}
           />
 
           <TodoList

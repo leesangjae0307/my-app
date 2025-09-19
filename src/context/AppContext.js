@@ -5,6 +5,7 @@ export const AppContext = createContext();
 const initialState = {
   users: [],
   todos: {},
+  categories: {},
   currentUser: null,
 };
 
@@ -13,6 +14,7 @@ export const ActionTypes = {
   SET_CURRENT_USER: "SET_CURRENT_USER",
   UPDATE_TODOS: "UPDATE_TODOS",
   UPDATE_USERS: "UPDATE_USERS",
+  UPDATE_CATEGORIES: "UPDATE_CATEGORIES",
   LOGOUT: "LOGOUT",
 };
 
@@ -45,6 +47,11 @@ const appReducer = (state, action) => {
       return {
         ...state,
         users: action.payload,
+      };
+    case ActionTypes.UPDATE_CATEGORIES:
+      return {
+        ...state,
+        categories: action.payload,
       };
     case ActionTypes.LOGOUT:
       return {
