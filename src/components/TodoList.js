@@ -3,7 +3,13 @@ import PropTypes from "prop-types";
 import TodoItem from "./TodoItem";
 import "./TodoList.css";
 
-function TodoList({ todos, toggleTodo, deleteTodo, categoryColorMap }) {
+function TodoList({
+  todos,
+  toggleTodo,
+  deleteTodo,
+  updateTodo,
+  categoryColorMap,
+}) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // 1초마다 currentTime 업데이트 → 모든 TodoItem에 전달
@@ -22,6 +28,7 @@ function TodoList({ todos, toggleTodo, deleteTodo, categoryColorMap }) {
           todo={todo}
           toggleTodo={toggleTodo}
           deleteTodo={deleteTodo}
+          updateTodo={updateTodo}
           categoryColorMap={categoryColorMap}
           currentTime={currentTime}
         />
@@ -42,6 +49,7 @@ TodoList.propTypes = {
   ).isRequired,
   toggleTodo: PropTypes.func.isRequired,
   deleteTodo: PropTypes.func.isRequired,
+  updateTodo: PropTypes.func.isRequired,
   categoryColorMap: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 

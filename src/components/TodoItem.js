@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import "./TodoItem.css";
 
@@ -6,9 +6,26 @@ function TodoItem({
   todo,
   toggleTodo,
   deleteTodo,
+  updateTodo,
   categoryColorMap,
   currentTime,
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+
+  // 날짜 포맷팅
+  const formattedDate = useMemo(() => {
+    const date = new Date(todo.dueDate);
+    const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const weekday = weekdays[date.getDay()];
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+
+    return `${month}월 ${day}일 (${weekday}) ${hours}:${minutes}`;
+  }, [todo.dueDate]);
+
   // 남은 시간 계산
   const timeLeft = useMemo(() => {
     const diff = new Date(todo.dueDate) - currentTime;
@@ -35,16 +52,63 @@ function TodoItem({
   const handleToggle = () => toggleTodo(todo.id);
   const handleDelete = () => deleteTodo(todo.id);
 
+  const handleSave = () => {
+    if (editText.trim()) {
+      updateTodo(todo.id, { ...todo, text: editText.trim() });
+      setIsEditing(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSave();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setEditText(todo.text);
+    }
+  };
+
   return (
     <li className="todo-item" style={{ backgroundColor }}>
-      <div onClick={handleToggle} className={todo.completed ? "completed" : ""}>
-        {todo.text} [{category}]
+      <div className="todo-main">
+        <input
+          type="checkbox"
+          checked={todo.completed}
+          onChange={handleToggle}
+          className="todo-checkbox"
+        />
+        {isEditing ? (
+          <input
+            type="text"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onKeyDown={handleKeyPress}
+            onBlur={handleSave}
+            autoFocus
+            className="todo-edit-input"
+          />
+        ) : (
+          <div
+            className={`todo-text ${todo.completed ? "completed" : ""}`}
+            onDoubleClick={() => setIsEditing(true)}
+          >
+            {todo.text}
+          </div>
+        )}
       </div>
-      <div className="todo-footer">
-        <span>
-          {timeLeft} ({todo.dueDate})
+      <div className="todo-info">
+        <span className="todo-category">[{category}]</span>
+        <span className="todo-date" title={timeLeft}>
+          {formattedDate}
         </span>
-        <button onClick={handleDelete}>삭제</button>
+        <div className="todo-actions">
+          <button onClick={() => setIsEditing(true)} className="edit-btn">
+            수정
+          </button>
+          <button onClick={handleDelete} className="delete-btn">
+            삭제
+          </button>
+        </div>
       </div>
     </li>
   );

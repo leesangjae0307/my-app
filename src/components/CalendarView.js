@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "./CalendarView.css";
 
-export default function CalendarView({ todos, onDateClick }) {
+export default function CalendarView({ todos, onDateClick, selectedDate }) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -20,12 +20,17 @@ export default function CalendarView({ todos, onDateClick }) {
   for (let i = 0; i < firstDay; i++) dates.push(null);
   for (let d = 1; d <= daysInMonth; d++) dates.push(d);
 
-  // todos 카운트 미모화
   const todoCountMap = useMemo(() => {
     const map = {};
     todos.forEach((t) => {
       const dayStr = t.dueDate.slice(0, 10);
-      map[dayStr] = (map[dayStr] || 0) + 1;
+      if (!map[dayStr]) {
+        map[dayStr] = { total: 0, completed: 0 };
+      }
+      map[dayStr].total += 1;
+      if (t.completed) {
+        map[dayStr].completed += 1;
+      }
     });
     return map;
   }, [todos]);
@@ -34,8 +39,9 @@ export default function CalendarView({ todos, onDateClick }) {
     <div className="calendar-container">
       <div className="calendar-header-nav">
         <button onClick={prevMonth}>◀ 이전</button>
-        <h3>
+        <h3 className="calendar-title">
           {year}년 {month + 1}월
+          {selectedDate ? ` ${new Date(selectedDate).getDate()}일` : ""}
         </h3>
         <button onClick={nextMonth}>다음 ▶</button>
       </div>
@@ -52,7 +58,9 @@ export default function CalendarView({ todos, onDateClick }) {
             2,
             "0"
           )}-${String(day).padStart(2, "0")}`;
-          const count = todoCountMap[dayStr] || 0;
+          const counts = todoCountMap[dayStr] || { total: 0, completed: 0 };
+          const remaining = counts.total - counts.completed;
+
           return (
             <div
               key={idx}
@@ -60,7 +68,16 @@ export default function CalendarView({ todos, onDateClick }) {
               onClick={() => day && onDateClick(dayStr)}
             >
               {day}
-              {count > 0 && <div className="todo-count">{count}</div>}
+              {counts.total > 0 && (
+                <div className="todo-count">
+                  {remaining > 0 && (
+                    <span className="remaining">{remaining}</span>
+                  )}
+                  {counts.completed > 0 && (
+                    <span className="completed">{counts.completed}</span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

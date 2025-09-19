@@ -24,3 +24,50 @@
 .todo-form button:hover {
   background-color: #45a049;
 }
+
+.category-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-select {
+  display: flex;
+  gap: 8px;
+}
+
+.category-select select {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.new-category {
+  display: flex;
+  gap: 8px;
+}
+
+.new-category input {
+  flex: 1;
+}
+
+.new-category button,
+.category-select button {
+  padding: 8px 12px;
+  background-color: #2196f3;
+}
+
+.new-category button:hover,
+.category-select button:hover {
+  background-color: #1976d2;
+}
+
+.new-category button:last-child {
+  background-color: #f44336;
+}
+
+.new-category button:last-child:hover {
+  background-color: #d32f2f;
+}

@@ -84,6 +84,16 @@ function AppContent() {
     });
   };
 
+  const updateTodo = (id, updatedTodo) => {
+    const newTodos = userTodos.map((todo) =>
+      todo.id === id ? updatedTodo : todo
+    );
+    dispatch({
+      type: ActionTypes.UPDATE_TODOS,
+      payload: newTodos,
+    });
+  };
+
   const logout = () => {
     dispatch({ type: ActionTypes.LOGOUT });
     setOriginalAdmin(null);
@@ -175,7 +185,7 @@ function AppContent() {
             </div>
           )}
 
-          <TodoForm addTodo={addTodo} />
+          <TodoForm addTodo={addTodo} categories={categories} />
 
           <div className="controls">
             <label>
@@ -206,12 +216,17 @@ function AppContent() {
             />
           </div>
 
-          <CalendarView todos={sortedTodos} onDateClick={handleDateClick} />
+          <CalendarView
+            todos={sortedTodos}
+            onDateClick={handleDateClick}
+            selectedDate={selectedDate}
+          />
 
           <TodoList
             todos={todosToShow}
             toggleTodo={toggleTodo}
             deleteTodo={deleteTodo}
+            updateTodo={updateTodo}
             categoryColorMap={categoryColorMap}
           />
         </>
