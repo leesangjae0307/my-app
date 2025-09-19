@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import "./TodoForm.css";
 
-export default function TodoForm({ addTodo }) {
+function TodoForm({ addTodo }) {
   const [text, setText] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [category, setCategory] = useState("");
@@ -38,3 +39,9 @@ export default function TodoForm({ addTodo }) {
     </form>
   );
 }
+
+TodoForm.propTypes = {
+  addTodo: PropTypes.func.isRequired,
+};
+
+export default React.memo(TodoForm);

@@ -1,22 +1,18 @@
 import React, { useState } from "react";
+import { useAppContext, ActionTypes } from "../context/AppContext";
 
-const Login = ({ setShowSignup, setCurrentUser, setAppData }) => {
+const Login = ({ setShowSignup }) => {
+  const { state, dispatch } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const login = () => {
-    const data = JSON.parse(localStorage.getItem("appData")) || {
-      users: [],
-      todos: {},
-    };
-    const user = data.users.find(
+    const user = state.users.find(
       (u) => u.email === email && u.password === password
     );
     if (!user) return alert("이메일 또는 비밀번호가 잘못되었습니다.");
-    data.currentUser = email;
-    localStorage.setItem("appData", JSON.stringify(data));
-    setAppData(data);
-    setCurrentUser(email);
+
+    dispatch({ type: ActionTypes.SET_CURRENT_USER, payload: email });
   };
 
   return (

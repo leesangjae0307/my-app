@@ -1,28 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import TodoForm from "./components/TodoForm";
 import TodoList from "./components/TodoList";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import CalendarView from "./components/CalendarView";
+import { AppProvider, useAppContext, ActionTypes } from "./context/AppContext";
+import { useTodoFilters } from "./hooks/useTodoFilters";
+import { useSortedTodos } from "./hooks/useSortedTodos";
+import { useCategoryColors } from "./hooks/useCategoryColors";
 import "./App.css";
 
-export default function App() {
-  const [appData, setAppData] = useState(() => {
-    return (
-      JSON.parse(localStorage.getItem("appData")) || {
-        users: [],
-        todos: {},
-        currentUser: null,
-      }
-    );
-  });
+function AppContent() {
+  const { state, dispatch } = useAppContext();
+  const { currentUser, users, todos } = state;
+  const userTodos = useMemo(
+    () => (currentUser ? todos[currentUser] || [] : []),
+    [currentUser, todos]
+  );
 
-  const [currentUser, setCurrentUser] = useState(appData.currentUser);
   const [showSignup, setShowSignup] = useState(false);
   const [originalAdmin, setOriginalAdmin] = useState(null);
-  const [todos, setTodos] = useState(
-    currentUser ? appData.todos[currentUser] || [] : []
-  );
   const [hideCompleted, setHideCompleted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -30,25 +27,31 @@ export default function App() {
 
   const isAdmin = currentUser === "admin";
 
-  // currentUser 변경 시 todos 업데이트
-  useEffect(() => {
-    if (currentUser) setTodos(appData.todos[currentUser] || []);
-  }, [currentUser, appData]);
+  const filteredTodos = useTodoFilters(userTodos, {
+    hideCompleted,
+    categoryFilter,
+    searchTerm,
+  });
 
-  // todos 변경 시 localStorage 업데이트
-  useEffect(() => {
-    if (!currentUser) return;
-    const newAppData = {
-      ...appData,
-      todos: { ...appData.todos, [currentUser]: todos },
-    };
-    setAppData(newAppData);
-    localStorage.setItem("appData", JSON.stringify(newAppData));
-  }, [todos, appData, currentUser]);
+  const sortedTodos = useSortedTodos(filteredTodos);
+
+  const todosToShow = selectedDate
+    ? sortedTodos.filter((t) => t.dueDate.slice(0, 10) === selectedDate)
+    : sortedTodos;
+
+  const categories = useMemo(() => {
+    return [
+      "All",
+      ...Array.from(new Set(userTodos.map((todo) => todo.category))),
+    ];
+  }, [userTodos]);
+
+  const BASE_COLORS = ["#ffd6d6", "#d6f0ff", "#d6ffd8", "#fff6d6", "#f0d6ff"];
+  const categoryColorMap = useCategoryColors(categories, BASE_COLORS);
 
   const addTodo = (text, dueDate, category) => {
-    setTodos((prev) => [
-      ...prev,
+    const newTodos = [
+      ...userTodos,
       {
         id: Date.now(),
         text,
@@ -56,81 +59,62 @@ export default function App() {
         category: category || "일반",
         completed: false,
       },
-    ]);
+    ];
+    dispatch({
+      type: ActionTypes.UPDATE_TODOS,
+      payload: newTodos,
+    });
   };
 
   const toggleTodo = (id) => {
-    setTodos((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
+    const newTodos = userTodos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
+    dispatch({
+      type: ActionTypes.UPDATE_TODOS,
+      payload: newTodos,
+    });
   };
 
-  const deleteTodo = (id) =>
-    setTodos((prev) => prev.filter((todo) => todo.id !== id));
-
-  const filteredTodos = todos.filter((todo) => {
-    if (hideCompleted && todo.completed) return false;
-    if (categoryFilter !== "All" && todo.category !== categoryFilter)
-      return false;
-    if (
-      searchTerm &&
-      !todo.text.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-      return false;
-    return true;
-  });
-
-  const sortedTodos = [...filteredTodos].sort(
-    (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
-  );
-
-  const todosToShow = selectedDate
-    ? sortedTodos.filter((t) => t.dueDate.slice(0, 10) === selectedDate)
-    : sortedTodos;
-
-  const categories = [
-    "All",
-    ...Array.from(new Set(todos.map((todo) => todo.category))),
-  ];
-
-  const BASE_COLORS = ["#ffd6d6", "#d6f0ff", "#d6ffd8", "#fff6d6", "#f0d6ff"];
-  const categoryColorMap = {};
-  categories.forEach(
-    (cat, i) => (categoryColorMap[cat] = BASE_COLORS[i % BASE_COLORS.length])
-  );
+  const deleteTodo = (id) => {
+    const newTodos = userTodos.filter((todo) => todo.id !== id);
+    dispatch({
+      type: ActionTypes.UPDATE_TODOS,
+      payload: newTodos,
+    });
+  };
 
   const logout = () => {
-    const newAppData = { ...appData, currentUser: null };
-    setAppData(newAppData);
-    setCurrentUser(null);
+    dispatch({ type: ActionTypes.LOGOUT });
     setOriginalAdmin(null);
-    localStorage.setItem("appData", JSON.stringify(newAppData));
   };
 
   const deleteUser = (email) => {
-    if (!isAdmin && currentUser !== originalAdmin)
-      return alert("관리자만 삭제 가능합니다.");
-    const newUsers = appData.users.filter((u) => u.email !== email);
-    const newTodos = { ...appData.todos };
-    delete newTodos[email];
-    const newAppData = { ...appData, users: newUsers, todos: newTodos };
-    setAppData(newAppData);
-    localStorage.setItem("appData", JSON.stringify(newAppData));
-    if (currentUser === email) setCurrentUser(originalAdmin || null);
+    if (!isAdmin && currentUser !== originalAdmin) {
+      alert("관리자만 삭제 가능합니다.");
+      return;
+    }
+    const newUsers = users.filter((u) => u.email !== email);
+    dispatch({ type: ActionTypes.UPDATE_USERS, payload: newUsers });
+
+    if (currentUser === email) {
+      dispatch({
+        type: ActionTypes.SET_CURRENT_USER,
+        payload: originalAdmin || null,
+      });
+    }
   };
 
   const viewUserTodos = (email) => {
     if (!isAdmin) return;
     if (!originalAdmin) setOriginalAdmin(currentUser);
-    setCurrentUser(email);
+    dispatch({ type: ActionTypes.SET_CURRENT_USER, payload: email });
     setSelectedDate(null);
   };
 
   const returnAdmin = () => {
     if (originalAdmin) {
-      setCurrentUser(originalAdmin);
+      dispatch({ type: ActionTypes.SET_CURRENT_USER, payload: originalAdmin });
       setOriginalAdmin(null);
       setSelectedDate(null);
     }
@@ -142,17 +126,9 @@ export default function App() {
     <div className="app-container">
       {!currentUser ? (
         showSignup ? (
-          <Signup
-            setShowSignup={setShowSignup}
-            setCurrentUser={setCurrentUser}
-            setAppData={setAppData}
-          />
+          <Signup setShowSignup={setShowSignup} dispatch={dispatch} />
         ) : (
-          <Login
-            setShowSignup={setShowSignup}
-            setCurrentUser={setCurrentUser}
-            setAppData={setAppData}
-          />
+          <Login setShowSignup={setShowSignup} dispatch={dispatch} />
         )
       ) : (
         <>
@@ -164,7 +140,7 @@ export default function App() {
           {isAdmin && !originalAdmin && (
             <div className="admin-panel">
               <h2>관리자: 사용자 리스트</h2>
-              {appData.users.map((user) => (
+              {users.map((user) => (
                 <div
                   key={user.email}
                   style={{
@@ -243,3 +219,13 @@ export default function App() {
     </div>
   );
 }
+
+function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
+  );
+}
+
+export default App;

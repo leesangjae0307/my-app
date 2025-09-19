@@ -1,25 +1,22 @@
 import React, { useState } from "react";
+import { useAppContext, ActionTypes } from "../context/AppContext";
 
-const Signup = ({ setShowSignup, setCurrentUser, setAppData }) => {
+const Signup = ({ setShowSignup }) => {
+  const { state, dispatch } = useAppContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const signup = () => {
-    const data = JSON.parse(localStorage.getItem("appData")) || {
-      users: [],
-      todos: {},
-      currentUser: null,
-    };
-    if (data.users.find((u) => u.email === email)) {
+    if (state.users.find((u) => u.email === email)) {
       return alert("이미 존재하는 계정입니다.");
     }
 
-    data.users.push({ email, password });
-    data.todos[email] = [];
-    data.currentUser = email;
-    localStorage.setItem("appData", JSON.stringify(data));
-    setAppData(data);
-    setCurrentUser(email);
+    const newUsers = [...state.users, { email, password }];
+    const newTodos = { ...state.todos, [email]: [] };
+
+    dispatch({ type: ActionTypes.UPDATE_USERS, payload: newUsers });
+    dispatch({ type: ActionTypes.UPDATE_TODOS, payload: newTodos });
+    dispatch({ type: ActionTypes.SET_CURRENT_USER, payload: email });
 
     alert("회원가입 완료!");
     setShowSignup(false); // 로그인 화면으로 이동
